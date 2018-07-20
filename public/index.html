@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head></head>
+    <body style="column-count: 5">
+    </body>
+
+    <script>
+        const urls = [
+            'https://facebook.com',
+            'http://aliexpress.com/',
+            'http://amazon.com/',
+            'https://www.apple.com/'
+        ];
+
+        urls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = `/screenshot/${encodeURIComponent(url)}`;
+            img.style.width = '100%';
+
+            document.body.appendChild(img);
+        });
+    </script>
+</html>
