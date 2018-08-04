@@ -1,29 +1,116 @@
 const puppeteer = require('puppeteer');
 const express = require('express');
+const fs = require('fs');
 
 (async () => {
 
     const app = express();
     app.use(express.static('./public'));
+
     const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    let chain = Promise.resolve();
+
+    const pages = [
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(),
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(),
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(), 
+        await browser.newPage(),
+        await browser.newPage(), 
+        await browser.newPage(),
+        await browser.newPage(), 
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+        await browser.newPage(),
+    ];
+
+    const chains = [
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(),
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(),
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(),
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(), 
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+    ];
+    
+    let counter = -1;
     
     app.get('/screenshot/:url', (req, res) => {
 
-        chain = chain.then(async () => {
+        if (counter === chains.length - 1) {
+            console.log('reset');
+            counter = 0;
+        } else {
+            console.log('incremening');
+            counter++;
+        }
+        
+        chains[counter] = chains[counter].then(async () => {
+            console.log('chain', counter + 1, 'has one more callback');
 
-            await page.goto(decodeURIComponent(req.params.url));
-            const buffer = await page.screenshot();
+            let image;
+
+            try {
+                await pages[counter].goto(decodeURIComponent(req.params.url));
+                image = await pages[counter].screenshot();
+                console.log('chain', counter + 1, 'is done with chrome');
+                if (image.length === 0) {
+                    console.log('there is something wrong', image)
+                    throw Error('we have an empty image from chrome');
+                }
+            } catch(error) {
+                image = fs.readFileSync('./fallback.png', 'binary');
+            }
             
             res.setHeader('Content-Type', 'image/png');
-            res.write(buffer, 'binary');
+            res.write(image, 'binary');
             res.end();
-
         });
     
     });
     
-    app.listen(43446);
+    app.listen(8080);
 
 })();
