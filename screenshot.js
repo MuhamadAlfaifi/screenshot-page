@@ -9,97 +9,25 @@ const fs = require('fs');
 
     const browser = await puppeteer.launch();
 
-    const pages = [
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(),
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(),
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(), 
-        await browser.newPage(),
-        await browser.newPage(), 
-        await browser.newPage(),
-        await browser.newPage(), 
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-        await browser.newPage(),
-    ];
-
-    const chains = [
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(),
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(),
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(),
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(), 
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-    ];
+    const page = await browser.newPage();
+    let chain = Promise.resolve();
     
-    let counter = -1;
+    let counter = 0;
     
     app.get('/screenshot/:url', (req, res) => {
-
-        if (counter === chains.length - 1) {
-            console.log('reset');
-            counter = 0;
-        } else {
-            console.log('incremening');
-            counter++;
-        }
-        
-        chains[counter] = chains[counter].then(async () => {
-            console.log('chain', counter + 1, 'has one more callback');
+        chain = chain.then(async () => {
+            // console.log('chain has one more promise callback is', counter);
 
             let image;
 
             try {
-                await pages[counter].goto(decodeURIComponent(req.params.url));
-                image = await pages[counter].screenshot();
-                console.log('chain', counter + 1, 'is done with chrome');
+                await page.goto(decodeURIComponent(req.params.url));
+                image = await page.screenshot();
                 if (image.length === 0) {
-                    console.log('there is something wrong', image)
+                    // console.log('callback', counter, 'finished with empty screeshot');
                     throw Error('we have an empty image from chrome');
                 }
+                // console.log('callback', counter, 'finished with successfull screenshot');
             } catch(error) {
                 image = fs.readFileSync('./fallback.png', 'binary');
             }
@@ -108,9 +36,12 @@ const fs = require('fs');
             res.write(image, 'binary');
             res.end();
         });
+
+        // counter++;
+        console.log('request chained')
     
     });
     
-    app.listen(8080);
+    app.listen(8081);
 
 })();
